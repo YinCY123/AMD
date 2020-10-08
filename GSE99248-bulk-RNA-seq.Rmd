@@ -1,0 +1,190 @@
+---
+title: "GSE99248"
+author: "yincy"
+date: "6/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(edgeR)
+library(limma)
+library(tidyverse)
+library(GEOquery)
+library(RColorBrewer)
+```
+
+
+```{r, cache=TRUE, eval=FALSE}
+GSE99248_meta_info <- getGEO(GEO = "GSE99248")
+
+Normal_RPE_title <- GSE99248_meta_info[[1]] %>% as.data.frame() %>% 
+  filter(eye.histological.phenotype.ch1 == "Normal", grepl("RPE", tissue.ch1)) %>% 
+  pull(title) %>% 
+  as.character()
+
+Early_AMD_title <- GSE99248_meta_info[[1]] %>% 
+  as.data.frame() %>% 
+  filter(eye.histological.phenotype.ch1 == "Early Age-related maculopathy", grepl("RPE", tissue.ch1)) %>%
+  pull(title) %>% 
+  as.character()
+
+Late_AMD_title <- GSE99248_meta_info[[1]] %>% 
+  as.data.frame() %>% 
+  filter(eye.histological.phenotype.ch1 == "Late exudative Age-related maculopathy", grepl("RPE", tissue.ch1)) %>%
+  pull(title) %>% 
+  as.character()
+
+Normal_RPE_title;Early_AMD_title;Late_AMD_title
+```
+
+
+```{r}
+gse99248_anti_sense <- read.table(file = "GSE99248_master_list_of_gene_counts_MIN.antisense.AMD_RNASeq.txt.gz",
+                             sep = "\t", 
+                             stringsAsFactors = F, 
+                             header = T)
+
+gs <- gse99248_anti_sense[, c("id", "geneSymbol", "geneCoordinate")]
+
+normal_samples <- c( "TR02", "TR06", "TR08", "TR10", "TR12", "TR14", "TR16")
+early_amd_samples <- c("TR.18", "TR.20", "TR.32")
+
+gse99248_anti_sense_normal_early <- gse99248_anti_sense[, c("id", "geneSymbol", "geneCoordinate", normal_samples, early_amd_samples)]
+```
+
+
+```{r}
+sample_info <- data.frame(
+  sample = c("TR02", "TR06", "TR08", "TR10", "TR12", "TR14", "TR16", "TR.18", "TR.20", "TR.32"), 
+  group = rep(c("Normal", "Early"), c(7, 3))
+)
+
+rownames(gse99248_anti_sense_normal_early) <- gse99248_anti_sense_normal_early$id
+noram_early_counts_table <- gse99248_anti_sense_normal_early[, c(4:13)]
+```
+
+
+# filtering out low expressed genes   
+```{r}
+y <- DGEList(counts = noram_early_counts_table, 
+             samples = sample_info, 
+             genes = gs)
+
+y <- calcNormFactors(object = y)
+```
+
+```{r}
+counts_cpm <- cpm(y, normalized.lib.sizes = T)
+rowSums(counts_cpm > 40) %>% table()
+keep_index <- rowSums(counts_cpm > 40) >= 3
+table(keep_index)
+
+noram_early_counts_table[keep_index, ]
+```
+
+```{r}
+y_filtered <- y[keep_index, ]
+```
+
+
+```{r}
+write.table(x = gs[keep_index, ], 
+            file = "GSE99248_Early_anti_sense_expressed_genes.txt", 
+            sep = "\t", 
+            row.names = F, 
+            quote = F)
+```
+
+
+```{r}
+barplot(y_filtered$samples$norm.factors)
+title("Normalize factor")
+```
+
+
+```{r}
+png(filename = "/home/yincy/git/R-codes/Retina/res/dimreduc_bulk_normal_amd.png")
+cols <- c('Normal' = "red", "Early" = "blue")
+ps = c("Normal" = 3, "Early" = 4)
+
+plotMDS(y, 
+        col = cols[y_filtered$samples$group], 
+        pch = ps[y_filtered$samples$group])
+
+legend("bottomright", legend = y_filtered$samples$group %>% unique(), 
+       pch = ps[y_filtered$samples$group %>% unique()], 
+       col = cols[y_filtered$samples$group %>% unique()])
+
+title(main = "Normal & Early AMD RPE")
+dev.off()
+```
+
+```{r}
+group = factor(y$samples$group)
+design = model.matrix(~ 0 + group)
+colnames(design) <- gsub("group", "", colnames(design))
+```
+
+```{r}
+v <- voom(counts = y, design = design, plot = T)
+```
+
+```{r}
+fit <- lmFit(object = v)
+
+cont_mat <- makeContrasts(Early.Normal = Early - Normal, levels = design)
+
+fit_cont <- contrasts.fit(fit = fit, contrasts = cont_mat)
+fit_cont <- eBayes(fit = fit_cont)
+
+summ_fit <- decideTests(object = fit_cont)
+summary(summ_fit)
+```
+
+```{r}
+saveRDS(object = fit_cont, file = "/home/yincy/git/R-codes/Retina/res/GSE99248_fit_cont.rds")
+saveRDS(object = y_filtered, file = "/home/yincy/git/R-codes/Retina/res/GSE99248_y_filtered.rds")
+write.csv(x = fit_cont %>% as.data.frame(), 
+          file = "/home/yincy/git/R-codes/Retina/res/GSE99248_bulk-seq-DEG-res.csv", row.names = T, col.names = T, quote = F)
+```
+
+
+```{r}
+bulk_normal_early_amd <- read.csv(file = "/home/yincy/git/R-codes/Retina/res/GSE99248_bulk-seq-DEG-res.csv")
+bulk_normal_early_amd %>% 
+  filter(genes.geneSymbol %in% c("RUNX2", "ESR1", "AR"))
+```
+
+
+```{r}
+y <- filtered <- readRDS(file = "/home/yincy/git/R-codes/Retina/res/GSE99248_y_filtered.rds")
+expression_regulators <- y_filtered %>% edgeR::cpm() %>% .[y_filtered$genes$geneSymbol %in% c("RUNX2", "AR", "ESR1", "SMAD3"), ] %>% 
+  as.data.frame() %>% 
+  rownames_to_column("ensembl") %>% 
+  left_join(gs[gs$geneSymbol %in% c("RUNX2", "AR", "ESR1", "SMAD3"), ], by = c('ensembl' = "id")) %>% 
+  dplyr::select(geneSymbol, contains("TR")) %>% 
+  gather(key = "sample", value = "expression", -geneSymbol) %>% 
+  mutate(group = ifelse(sample %in% early_amd_samples, "Early AMD", "Normal"), 
+         geneSymbol = factor(geneSymbol, levels = c("RUNX2", "AR", "ESR1", "SMAD3"))) %>% 
+  ggplot(aes(reorder(geneSymbol, expression), expression)) +
+  geom_boxplot(aes(color = group)) + 
+  geom_jitter(aes(color = group), show.legend = F, width = 0.1) +
+  scale_x_discrete(name = NULL) +
+  scale_y_continuous(name = "relative expression") +
+  facet_wrap(. ~ geneSymbol, scales = "free", nrow = 1) +
+  scale_color_discrete(name = NULL) +
+  theme(legend.position = "top", 
+        panel.background = NULL, 
+        axis.ticks.length.x = unit(x = 0, units = "cm"), 
+        axis.text.x = element_text(size = 0))
+
+expression_regulators
+saveRDS(object = expression_regulators, file = "/home/yincy/git/R-codes/Retina/res/expression_regulators.rds")
+```
+
+
+
