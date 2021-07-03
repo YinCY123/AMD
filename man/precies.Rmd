@@ -1,0 +1,13 @@
+---
+title: "precies"
+author: "yincy"
+date: "10/31/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+In this manuscript, we find that choriocapillaris endothelial cells through TGFB1 to influence the expression of COL10A1, a collagen family, to participate the pathogenesis of neovascular AMD.

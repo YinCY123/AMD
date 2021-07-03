@@ -1,0 +1,33 @@
+---
+title: Protocol
+csl: elsevier-with-titles-alphabetical.csl
+output:
+  bookdown::word_document2: default
+  fig_caption: yes
+  
+link-citations: yes
+
+bibliography:
+- /home/yincy/git/R-codes/rmarkdown/library.bib
+- /home/yincy/git/Data/mendeley.bib/library.bib
+- /home/yincy/git/R-codes/rmarkdown/-mendeley.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Procedures  
+
+To find data suitable for our purpose, we searched the NCBI Gene Expression Omnibus database (GEO), and find the CD31 enriched single-cell RNA-seq of choroidal described by Voigt[@Voigt2019a], which characterized the arteriole, vein, and choriocapillaris endothelial cells.  
+
+the choriocapillaris endothelial cells are used to define the potential ligands expressed by the choriocapillaris endothelial cells that might regulator macular degeneration related genes expressed by RPE.   
+
+The single-cell trajectory was conducted on choriocapillaris endothelial cells among CD31 enriched patients to find the differentially expressed ligands along the trajectory using monocle3[@Trapnell2014a;@Qiu2017;@Qiu2017a], batch effects were removed using the method described by Haghverdi[@Haghverdi2018].  
+
+For the RPE data, we use the bulk RNA-seq data mentioned by Kim[@Kim2018a], which they find a significant impact on the anti-sense transcripts between the normal and early AMD patients compare to the sense transcripts.   
+
+This data is used to define the background expressed genes and age-related macular degeneration genes in early AMD.   
+
+Differential expression analysis was carried out with edgeR-limma[@McCarthy2012;@Ritchie2015] R/Bioconductor packages between normal and early AMD patients.
+
+# Reference  

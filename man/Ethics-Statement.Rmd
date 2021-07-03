@@ -1,0 +1,20 @@
+---
+title: "Certificate of Laboratory Animal Ethics"
+output: 
+    bookdown::word_document2: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The manuscripts entitled "Choriocapillaris participate in the progress of age-related macular degeneration by regulating COL10A1 expressed by retina pigment epithelial" do not involve any human or animal experiments, IRB/ethical approval is not required under the guide of our institution.  
+
+
+**Laboratory Animal Ethics Committe**  
+
+**Zhejiang University**
+
+`r Sys.Date()`
+

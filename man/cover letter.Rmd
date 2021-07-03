@@ -1,0 +1,36 @@
+---
+output:
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Scientific Reports*
+
+Dear Editors,  
+
+We would like to submit the enclosed manuscript entitled "**Choriocapillaris participate in the progress of age-related macular degeneration by regulate COL10A1 expressed by retina pigment epithelial**", which we wish to to be considered for publication in **Scientific Reports** as an **Artical**. All authors have approved the publication of the manuscript, and the manuscript describes original work has not been publish or is under consideration elsewhere.  
+
+In this work we described that Choriocapillaris not only the oxygen and nutrients supplier to the retina pigment epithelial but also an participater of retina pigment degeneration, which by regulating the expression of COL10A1 expressed by retina pigment epithelial contribute to the development of neovascular age-related macular degeneration.  
+
+**The significance of our works are**:  
+
+1. The first time to highlight the importance of Choriocapillaris, not only the oxygen and nutrients supplier, but also participant in the progress of age-related macular degeneration.  
+
+2. Extracellular matrix remodeling might an earlier event in the pregress of age-related macular degeneration that responsible for the drusen deposition, and neovascularization.  
+
+3. The TGFB1-RUNX2-COL10A1 signaling pathway discovered in this work might provides a promising theraputic targets for neovascular AMD then anti-VEGF.  
+
+In this work we offered an novel signaling pathway and perspective of the pathogenesis of AMD, that could provides new theraputic targets for neovascular AMD, as some patients suffering significant side-effects after anti-VEGF therapy.  
+
+Sincerely, 
+
+Chunyou Yin, Ph.D Student  
+
+Zhejiang University School of Medicine  
+866 Yuhangtang Rd.  
+Hangzhou, Zhejiang, China, 310009  
+Tel: (86)156-5809-0926  
+Email: yinchunyou@zju.edu.cn  
